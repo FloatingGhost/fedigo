@@ -141,10 +141,23 @@ func authenticate(c *config) {
 func postLoop(c *config) {
 	client := &http.Client{}
 
-	prompt := promptui.Prompt{
-		Label: "Post",
+	validate := func(input string) error {
+		if len(input) == 0 {
+			return errors.New("Cannot be empty")
+		}
+		return nil
 	}
-	status, _ := prompt.Run()
+
+	prompt := promptui.Prompt{
+		Label:    "Post",
+		Validate: validate,
+	}
+	status, err := prompt.Run()
+
+    if err != nil {
+        os.Exit(0)
+    }
+
 	visibilityPrompt := promptui.Select{
 		Label: "Visibility",
 		Items: []string{"public", "unlisted", "private", "direct"},
@@ -172,6 +185,7 @@ func main() {
 	conf := configure()
 	authenticate(conf)
 	writeConfig(conf)
+
 	for {
 		postLoop(conf)
 	}
